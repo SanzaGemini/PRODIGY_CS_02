@@ -1,73 +1,125 @@
 from PIL import Image
-from tkinter import filedialog   
+from tkinter import filedialog
 
-def load_image():
-    return Image.open(filedialog.askopenfilename(title="Select Image To Encrypt/Decrypt.",filetypes=[("Image files","*.jpg *.jpeg *.gif")]))
-     
+def loadImage():
+    """
+    Prompts the user to select an image file and loads it.
 
-def encrypt_decrypt(img,type):
+    Returns:
+        Image: The loaded image.
+    """
+    return Image.open(filedialog.askopenfilename(
+        title="Select Image To Encrypt/Decrypt.",
+        filetypes=[("Image files", "*.jpg *.jpeg *.gif")]
+    ))
 
+def encryptDecrypt(img, operationType):
+    """
+    Encrypts or decrypts an image by swapping pixels horizontally and vertically.
+
+    Args:
+        img (Image): The image to be processed.
+        operationType (str): "encrypt" or "decrypt", determines the operation.
+
+    Returns:
+        Image: The processed image.
+    """
     pixels = img.load()
     height = img.height
     width = img.width
 
-    if type == "encrypt":
-        horizontal_pixel_swap(width,height,pixels)
-        vertical_pixel_swap(width,height,pixels)
+    if operationType == "encrypt":
+        horizontalPixelSwap(width, height, pixels)
+        verticalPixelSwap(width, height, pixels)
     else:
-        vertical_pixel_swap(width,height,pixels)
-        horizontal_pixel_swap(width,height,pixels)
+        verticalPixelSwap(width, height, pixels)
+        horizontalPixelSwap(width, height, pixels)
 
     return img
 
-def horizontal_pixel_swap(width,height,pixels):
+def horizontalPixelSwap(width, height, pixels):
+    """
+    Swaps pixels horizontally in blocks of 20 pixels width.
+
+    Args:
+        width (int): Width of the image.
+        height (int): Height of the image.
+        pixels (PixelAccess): Pixel access object for the image.
+    """
     for h in range(height):
         for w in range(0, width - 19, 20):  # Iterate in blocks of 20 along width
-            # Swap 0 with 19, 1 with 18, 2 with 17, 3 with 16, and 4 with 15. etc
             for i in range(10):
                 r1, g1, b1 = pixels[w + i, h]
                 r2, g2, b2 = pixels[w + (19 - i), h]
-                # Swap the pixels
                 pixels[w + i, h] = (r2, g2, b2)
                 pixels[w + (19 - i), h] = (r1, g1, b1)
 
+def verticalPixelSwap(width, height, pixels):
+    """
+    Swaps pixels vertically in blocks of 20 pixels height.
 
-def vertical_pixel_swap(width,height,pixels):
+    Args:
+        width (int): Width of the image.
+        height (int): Height of the image.
+        pixels (PixelAccess): Pixel access object for the image.
+    """
     for w in range(width):
         for h in range(0, height - 19, 20):  # Iterate in blocks of 20 along height
-            # Swap 0 with 19, 1 with 18, 2 with 17, 3 with 16, and 4 with 15..etc 
             for i in range(10):
                 r1, g1, b1 = pixels[w, h + i]
                 r2, g2, b2 = pixels[w, h + (19 - i)]
-                # Swap the pixels
                 pixels[w, h + i] = (r2, g2, b2)
                 pixels[w, h + (19 - i)] = (r1, g1, b1)
 
-def save_image(img,type,image_name):
-    img.save(f"{type}_{image_name}.jpeg")
+def saveImage(img, operationType, imageName):
+    """
+    Saves the processed image with a given name.
 
-def getType():
-    print("If You Want To End The Program Enter 1\n")
-    type = input("Would You Like To Encrypt Or Decrypt An Image?")
-    if type.lower() in ["encrypt","decrypt"]:
-        return type
-    elif type  == "1":
+    Args:
+        img (Image): The image to be saved.
+        operationType (str): "encrypt" or "decrypt", used to prefix the filename.
+        imageName (str): The name to save the image as.
+    """
+    img.save(f"{operationType}_{imageName}.jpeg")
+
+def getOperationType():
+    """
+    Prompts the user for the operation type (encrypt/decrypt).
+
+    Returns:
+        str or None: "encrypt" or "decrypt", or None if the user chooses to exit.
+    """
+    print("\nIf You Want To End The Program Enter 1")
+    operationType = input("\nWould You Like To Encrypt Or Decrypt An Image?\n")
+
+    if operationType.lower() in ["encrypt", "decrypt"]:
+        return operationType
+    elif operationType == "1":
         return None
-    else: return getType()
+    else:
+        return getOperationType()
 
+def getImageName():
+    """
+    Prompts the user to provide a name for saving the new image.
 
-def get_image_name():
-    return input("\nEnter A Name To Save The New Image: ")
+    Returns:
+        str: The name entered by the user.
+    """
+    return input("\nEnter A Name To Save The New Image: \n")
 
 if __name__ == "__main__":
     print("*** Welcome To The Image Encryption/Decryption Program ***")
-    while(True):
-        type = getType()
-        if type == None:
+
+    while True:
+        operationType = getOperationType()
+
+        if operationType is None:
             break
 
-        image = load_image()
-        image = encrypt_decrypt(image,type)
-        image_name = get_image_name()
-        save_image(image,type,image_name)
+        image = loadImage()
+        image = encryptDecrypt(image, operationType)
+        imageName = getImageName()
+        saveImage(image, operationType, imageName)
+
     print("\n*** Thank You For Using The Image Encryption/Decryption Program ***")
